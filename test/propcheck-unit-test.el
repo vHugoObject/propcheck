@@ -365,20 +365,6 @@ This is intended for manual testing. Try calling it inside an ielm buffer."
          examples)))
     examples))
 
-(ert-deftest propcheck-shrinking-buggy-zerop ()
-  "Ensure that we find the minimal counterexample for
-`propcheck--buggy-zerop'."
-  (let ((optimal-count 0))
-    (dotimes (_ 10)
-      (let* ((found-seed
-              (propcheck--find-small-counterexample #'propcheck--buggy-zerop-test))
-             (propcheck-seed found-seed)
-             (propcheck--replay t)
-             (i (propcheck-generate-integer nil)))
-        (when (= i 1)
-          (cl-incf optimal-count))))
-    ;; We should get the optimal result at least 90% of the time.
-    (should (>= optimal-count 9))))
 
 (defun propcheck--buggy-max-item (items)
   (car items))

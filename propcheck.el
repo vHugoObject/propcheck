@@ -45,6 +45,7 @@
 (defvar propcheck-max-shrinks 200)
 (defvar propcheck--shrinks-remaining nil)
 (defvar propcheck--replay nil)
+(defvar propcheck--test-err-condition nil)
 
 (defvar propcheck-seed
   nil
@@ -361,9 +362,10 @@ If a counterexample is found, return the final seed."
          (propcheck--no-intervals seed)))
     (catch 'propcheck--counterexample
       (catch 'propcheck--overrun
-        (condition-case nil
+        (condition-case test-err-condition
             (funcall fun)
           (error
+	   (setq propcheck--test-err-condition test-err-condition)
            ;; Consider an error to be another counterexample.
            (throw 'propcheck--counterexample propcheck-seed))))
       nil)))
@@ -671,9 +673,10 @@ inputs found will be reported."
               (found-seed
                (propcheck--find-small-counterexample ,fun-sym)))
          (when found-seed
-           (let ((propcheck--replay '(())))
+           (let ((propcheck--replay '(()))
+		 (propcheck--test-execution-errors nil))
              (propcheck--funcall-with-seed ,fun-sym found-seed)
-             (ert-fail (list "Found counterexample" (butlast propcheck--replay)))))))))
-
+             (ert-fail (list "Found counterexample" (butlast propcheck--replay)
+			     "Test execution errors:" propcheck--test-err-condition))))))))
 (provide 'propcheck)
 ;;; propcheck.el ends here
