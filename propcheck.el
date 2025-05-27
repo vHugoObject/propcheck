@@ -353,6 +353,12 @@ Note that elisp does not have a separate character type."
     (throw 'propcheck--counterexample
            propcheck-seed)))
 
+(defun propcheck-should-not (invalid-p)
+    (when invalid-p
+      (throw 'propcheck--counterexample
+  	   propcheck-seed)))
+
+
 (defun propcheck--funcall-with-seed (fun seed)
   "Call FUN with SEED used to generate inputs.
 If a counterexample is found, return the final seed."
