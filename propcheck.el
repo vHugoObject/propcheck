@@ -303,6 +303,25 @@ If no limits are specified, values may be anywhere between
           num
         (- num)))))
 
+(defun propcheck-generate-float-between-zero-and-one (name)
+    (propcheck-remember name
+      (let*  ;; can't do any larger due to rounding
+  	((max-positive-num (- most-positive-fixnum 10000000000000000))
+  	 (random-integer (propcheck-generate-integer nil :min 0 :max max-positive-num)))
+      (/ random-integer (float most-positive-fixnum)))))
+
+  (defun propcheck-generate-float-with-min-and-max (name &key min &key max)
+    (when (and min max)
+      (unless (< min max)
+  	(user-error "Min %d is not less than max %d" min max)))
+    (propcheck-remember name
+      (let* ((min-ceiled (ceiling (or min most-negative-fixnum)))
+  	     (max-floored (floor (or max most-positive-fixnum)))
+  	     (max-min (- max-floored min-ceiled))
+  	     (random-float (+ (* (propcheck-generate-float-between-zero-and-one nil) max-min) min-ceiled)))
+        ;; for shrinking
+        (ffloor random-float))))
+
 (defun propcheck-generate-ascii-char (name)
   "Generate a number that's an ASCII char.
 Note that elisp does not have a separate character type."
