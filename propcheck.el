@@ -310,7 +310,7 @@ If no limits are specified, values may be anywhere between
   	 (random-integer (propcheck-generate-integer nil :min 0 :max max-positive-num)))
       (/ random-integer (float most-positive-fixnum)))))
 
-  (defun propcheck-generate-float-with-min-and-max (name &key min &key max)
+(defun propcheck-generate-float-with-min-and-max (name &key min &key max)
     (when (and min max)
       (unless (< min max)
   	(user-error "Min %d is not less than max %d" min max)))
@@ -344,6 +344,18 @@ Note that elisp does not have a separate character type."
       (while (> (propcheck--draw-byte propcheck-seed) 50)
         (push (funcall value-fn nil) result))
       result)))
+
+(cl-defun propcheck-generate-proper-list-with-min-and-max (name &key min-length &key max-length &key value-fn)
+    "Generate a list of unique integers"
+    (when (and min-length max-length)
+      (unless (<= min-length max-length)
+      (user-error "min-length %d is not less than max-length %d" min-length max-length)))
+    (propcheck-remember name (let* ((nums-to-gen (if (and min-length max-length (= min-length max-length))
+  						  min-length
+  						(propcheck-generate-integer nil :min (or min-length 1) :max (or max-length 255)))))
+  			     (-times value-fn nums-to-gen))))
+
+
 
 (defun propcheck-generate-vector (name &key value-fn)
   "Generate a vector whose values are drawn from VALUE-FN."
