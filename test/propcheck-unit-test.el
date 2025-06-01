@@ -306,6 +306,44 @@ unsigned integer)."
     ;; We should get the optimal result at least 90% of the time.
     (should (>= optimal-count 9))))
 
+
+  (ert-deftest propcheck-generate-float-between-zero-and-one ()
+    (let* ((propcheck--replay t)
+         (propcheck-seed
+          (propcheck-seed '(8)))
+         (actual-float (propcheck-generate-float-between-zero-and-one nil)))
+      (should (eq (and (floatp actual-float) (>= actual-float 0.0) (< actual-float 1)) t))))
+
+(ert-deftest propcheck-generate-float-with-min-and-max ()
+    (let* ((propcheck--replay t)
+         (propcheck-seed
+          (propcheck-seed '(8)))
+         (range-min (random 100000000))
+         (range-max (+ range-min (random 1000000000)))
+         (actual-float (propcheck-generate-float-with-min-and-max nil :min range-min :max range-max)))
+      (should (eq (and (floatp actual-float) (>= actual-float range-min) (< actual-float range-max)) t))))
+
+  (ert-deftest propcheck-generate-proper-list-with-min-and-max--basic ()
+    (let* ((propcheck--replay t)
+         (propcheck-seed (propcheck-seed '(0 0)))
+         (actual-list (propcheck-generate-proper-list-with-min-and-max nil :value-fn #'propcheck-generate-bool)))
+    (should (equal actual-list '(nil)))))
+    
+
+   (ert-deftest propcheck-generate-proper-list--range-min ()
+     (let* ((propcheck--replay t)
+            (propcheck-seed
+             (propcheck-seed '(0 0 0 0 0 0 0 0)))
+   	 (actual-list (propcheck-generate-proper-list-with-min-and-max nil :value-fn #'propcheck-generate-integer :min-length 5)))
+       (should (eql (length actual-list) 5))))
+
+   (ert-deftest propcheck-generate-proper-list--range-max ()
+     (let* ((propcheck--replay t)
+            (propcheck-seed (propcheck-seed '(255 255)))
+   	 (actual-list (propcheck-generate-proper-list-with-min-and-max nil :value-fn #'propcheck-generate-integer :min-length 1  :max-length 64)))
+       (should (eql (length actual-list) 64))))
+
+
 (defun propcheck--buggy-max-pair (x y)
   (if (< x 101)
       ;; Correct implementation.
@@ -391,3 +429,4 @@ the optimal result."
 
 ;; Ideal result: (0 1) or (-1 0)
 (propcheck--max-item-examples)
+

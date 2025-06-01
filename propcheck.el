@@ -46,7 +46,7 @@
 (defvar propcheck--shrinks-remaining nil)
 (defvar propcheck--replay nil)
 (defvar propcheck--test-err-condition nil)
-
+(defvar max-positive-num (- most-positive-fixnum 10000000000000000))
 (defvar propcheck-seed
   nil
   "The current seed being used to generate values.
@@ -306,8 +306,7 @@ If no limits are specified, values may be anywhere between
 (defun propcheck-generate-float-between-zero-and-one (name)
     (propcheck-remember name
       (let*  ;; can't do any larger due to rounding
-  	((max-positive-num (- most-positive-fixnum 10000000000000000))
-  	 (random-integer (propcheck-generate-integer nil :min 0 :max max-positive-num)))
+  	((random-integer (propcheck-generate-integer nil :min 0 :max max-positive-num)))
       (/ random-integer (float most-positive-fixnum)))))
 
 (defun propcheck-generate-float-with-min-and-max (name &key min &key max)
